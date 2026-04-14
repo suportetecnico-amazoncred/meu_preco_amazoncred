@@ -1,11 +1,5 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { Calculator } from "lucide-react";
 import PricingCalculator from "./components/PricingCalculator";
-import { Toaster } from "sonner";
 
 export default function App() {
   return (
@@ -29,9 +23,6 @@ export default function App() {
           <p>© {new Date().getFullYear()} Meu Preço - Ferramenta de Apoio ao Pequeno Negócio</p>
         </footer>
       </div>
-      <Toaster position="top-right" />
     </div>
   );
 }
-
-
