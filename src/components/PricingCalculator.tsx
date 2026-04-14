@@ -18,7 +18,7 @@ export default function PricingCalculator() {
 
   // Labor State
   const [ganhoDesejado, setGanhoDesejado] = useState<number>(0);
-  const [ganhoDesejadoDisplay, setGanhoDesejadoDisplay] = useState('0,00');
+  const [ganhoDesejadoDisplay, setGanhoDesejadoDisplay] = useState('');
   const [horasPorDia, setHorasPorDia] = useState<number>(0);
   const [diasPorMes, setDiasPorMes] = useState<number>(0);
   
@@ -101,7 +101,7 @@ export default function PricingCalculator() {
   const resetCalculator = () => {
     setIsResetting(true);
     setGanhoDesejado(0);
-    setGanhoDesejadoDisplay('0,00');
+    setGanhoDesejadoDisplay('');
     setHorasPorDia(0);
     setDiasPorMes(0);
     setExpenses([]);
@@ -148,19 +148,26 @@ export default function PricingCalculator() {
                 <div className="space-y-2">
                   <Label>Meta de Ganho Mensal</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">R$</span>
                     <Input 
                       type="text" 
-                      placeholder="0,00" 
+                      placeholder="Ex: 1.621,00" 
                       value={ganhoDesejadoDisplay} 
                       onChange={e => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === '' || !isNaN(Number(val))) {
-                          setGanhoDesejadoDisplay(e.target.value);
-                          setGanhoDesejado(val === '' ? 0 : Number(val));
+                        const rawValue = e.target.value.replace(/\D/g, "");
+                        if (rawValue === "") {
+                          setGanhoDesejadoDisplay("");
+                          setGanhoDesejado(0);
+                          return;
                         }
+                        const numberValue = Number(rawValue) / 100;
+                        setGanhoDesejado(numberValue);
+                        setGanhoDesejadoDisplay(
+                          numberValue.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        );
                       }}
-                      className="pl-9"
                     />
                   </div>
                 </div>
@@ -223,19 +230,27 @@ export default function PricingCalculator() {
                       <Label className="text-xs">Quanto custou?</Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">R$</span>
                           <Input 
                             type="text" 
                             placeholder="0,00" 
                             value={currentExpenseDisplay} 
                             onChange={e => {
-                              const val = e.target.value.replace(',', '.');
-                              if (val === '' || !isNaN(Number(val))) {
-                                setCurrentExpenseDisplay(e.target.value);
-                                setCurrentExpenseValue(val === '' ? '' : Number(val));
+                              const rawValue = e.target.value.replace(/\D/g, "");
+                              if (rawValue === "") {
+                                setCurrentExpenseDisplay("");
+                                setCurrentExpenseValue("");
+                                return;
                               }
+                              const numberValue = Number(rawValue) / 100;
+                              setCurrentExpenseValue(numberValue);
+                              setCurrentExpenseDisplay(
+                                numberValue.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              );
                             }}
-                            className="bg-white pl-9"
+                            className="bg-white"
                           />
                         </div>
                         <Button onClick={addExpense} className="shrink-0" disabled={!currentExpenseName || currentExpenseValue === ''}>
@@ -318,38 +333,52 @@ export default function PricingCalculator() {
                 <div className="space-y-2">
                   <Label>Custos Extras (Unid)</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">R$</span>
                     <Input 
                       type="text" 
                       placeholder="0,00" 
                       value={custosExtrasDisplay} 
                       onChange={e => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === '' || !isNaN(Number(val))) {
-                          setCustosExtrasDisplay(e.target.value);
-                          setCustosExtras(val === '' ? 0 : Number(val));
+                        const rawValue = e.target.value.replace(/\D/g, "");
+                        if (rawValue === "") {
+                          setCustosExtrasDisplay("");
+                          setCustosExtras(0);
+                          return;
                         }
+                        const numberValue = Number(rawValue) / 100;
+                        setCustosExtras(numberValue);
+                        setCustosExtrasDisplay(
+                          numberValue.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        );
                       }}
-                      className="pl-9"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Custos Fixos (Mês)</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">R$</span>
                     <Input 
                       type="text" 
                       placeholder="Ex: Aluguel" 
                       value={custosFixosDisplay} 
                       onChange={e => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === '' || !isNaN(Number(val))) {
-                          setCustosFixosDisplay(e.target.value);
-                          setCustosFixosMensais(val === '' ? 0 : Number(val));
+                        const rawValue = e.target.value.replace(/\D/g, "");
+                        if (rawValue === "") {
+                          setCustosFixosDisplay("");
+                          setCustosFixosMensais(0);
+                          return;
                         }
+                        const numberValue = Number(rawValue) / 100;
+                        setCustosFixosMensais(numberValue);
+                        setCustosFixosDisplay(
+                          numberValue.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        );
                       }}
-                      className="pl-9"
                     />
                   </div>
                 </div>
