@@ -136,7 +136,7 @@ export default function PricingCalculator() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-card">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Clock className="w-5 h-5 text-primary" />
@@ -189,10 +189,10 @@ export default function PricingCalculator() {
                     onChange={e => setDiasPorMes(Number(e.target.value))}
                   />
                 </div>
-                <div className="md:col-span-3 p-3 bg-slate-50 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div className="md:col-span-3 p-3 bg-muted rounded-lg flex flex-col sm:flex-row items-center justify-between gap-2">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase text-slate-400 font-bold">Total de Horas: {totalHorasMensais}h/mês</span>
-                    <span className="text-sm text-slate-500">Valor da sua hora calculada:</span>
+                    <span className="text-[10px] uppercase text-muted-foreground font-bold">Total de Horas: {totalHorasMensais}h/mês</span>
+                    <span className="text-sm text-muted-foreground">Valor da sua hora calculada:</span>
                   </div>
                   <span className="font-bold text-primary text-lg">{valorHora.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
@@ -206,7 +206,7 @@ export default function PricingCalculator() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <Card className="border-none shadow-sm bg-white overflow-hidden">
+            <Card className="border-none shadow-sm bg-card overflow-hidden">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Package className="w-5 h-5 text-primary" />
@@ -215,7 +215,7 @@ export default function PricingCalculator() {
                 <CardDescription>Adicione os materiais e valores gastos para este produto.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-4">
+                <div className="p-4 bg-muted rounded-xl border border-border space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label className="text-xs">O que você usou?</Label>
@@ -223,7 +223,7 @@ export default function PricingCalculator() {
                         placeholder="Ex: Tecido, Linha, Botão..." 
                         value={currentExpenseName} 
                         onChange={e => setCurrentExpenseName(e.target.value)}
-                        className="bg-white"
+                        className="bg-card"
                       />
                     </div>
                     <div className="space-y-2">
@@ -250,7 +250,7 @@ export default function PricingCalculator() {
                                 })
                               );
                             }}
-                            className="bg-white"
+                            className="bg-card"
                           />
                         </div>
                         <Button onClick={addExpense} className="shrink-0" disabled={!currentExpenseName || currentExpenseValue === ''}>
@@ -263,11 +263,11 @@ export default function PricingCalculator() {
 
                 <div className="space-y-2">
                   {expenses.length === 0 ? (
-                    <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-xl">
-                      <p className="text-xs text-slate-400">Nenhum material adicionado ainda.</p>
+                    <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
+                      <p className="text-xs text-muted-foreground">Nenhum material adicionado ainda.</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden">
+                    <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
                       <AnimatePresence initial={false}>
                         {expenses.map((row) => (
                           <motion.div 
@@ -276,21 +276,21 @@ export default function PricingCalculator() {
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors"
+                            className="flex items-center justify-between p-3 bg-card hover:bg-muted transition-colors"
                           >
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium text-slate-700">{row.nome}</span>
-                              <span className="text-[10px] text-slate-400 uppercase font-bold">Material</span>
+                              <span className="text-sm font-medium text-foreground">{row.nome}</span>
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold">Material</span>
                             </div>
                             <div className="flex items-center gap-4">
-                              <span className="font-bold text-slate-900">
+                              <span className="font-bold text-foreground">
                                 {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                               </span>
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => removeExpense(row.id)}
-                                className="text-slate-300 hover:text-destructive h-8 w-8"
+                                className="text-muted-foreground hover:text-destructive h-8 w-8"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -311,7 +311,7 @@ export default function PricingCalculator() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <Card className="border-none shadow-sm bg-white">
+            <Card className="border-none shadow-sm bg-card">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-primary" />
@@ -404,31 +404,31 @@ export default function PricingCalculator() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.4 }}
           >
-            <Card className="bg-slate-900 text-white border-none shadow-xl">
+            <Card className="bg-card text-foreground border-border shadow-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary">
                   <Calculator className="w-6 h-6" />
                   Resultado Final
                 </CardTitle>
-                <CardDescription className="text-slate-400">Cálculo em tempo real do seu produto.</CardDescription>
+                <CardDescription className="text-muted-foreground">Cálculo em tempo real do seu produto.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Total em Materiais:</span>
+                    <span className="text-muted-foreground">Total em Materiais:</span>
                     <span>{custoMateriais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Mão de Obra ({tempoPreparo}h):</span>
+                    <span className="text-muted-foreground">Mão de Obra ({tempoPreparo}h):</span>
                     <span>{custoMaoDeObra.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Custos Extras:</span>
+                    <span className="text-muted-foreground">Custos Extras:</span>
                     <span>{custosExtras.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
-                  <Separator className="bg-white/10" />
+                  <Separator className="bg-border" />
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 font-medium">Custo de Produção Total:</span>
+                    <span className="text-muted-foreground font-medium">Custo de Produção Total:</span>
                     <span className="text-xl font-bold">{custoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
                 </div>
@@ -451,7 +451,7 @@ export default function PricingCalculator() {
                       placeholder="Ex: 50"
                       value={quantidadeProduzida || ''}
                       onChange={e => setQuantidadeProduzida(Number(e.target.value))}
-                      className="bg-white/10 border-white/20 text-white text-center h-8 focus:bg-white/20"
+                      className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground text-center h-8 focus:bg-primary-foreground/20"
                     />
                   </div>
 
@@ -466,17 +466,17 @@ export default function PricingCalculator() {
 
                 {/* Idea 3: Break-even Point UI */}
                 {custosFixosMensais > 0 && (
-                  <div className="p-4 bg-slate-800/50 border border-white/5 rounded-xl flex items-center gap-3">
+                  <div className="p-4 bg-muted border border-border rounded-xl flex items-center gap-3">
                     <Target className="w-8 h-8 text-secondary" />
                     <div>
-                      <p className="text-[10px] uppercase text-slate-400 font-bold">Meta de Vendas</p>
+                      <p className="text-[10px] uppercase text-muted-foreground font-bold">Meta de Vendas</p>
                       <p className="text-sm">Venda <span className="text-secondary font-bold">{pontoEquilibrio} unidades</span> para pagar seus custos fixos.</p>
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-3 pt-4">
-                  <h4 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Resumo das Fórmulas</h4>
+                  <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Resumo das Fórmulas</h4>
                   <div className="space-y-2 text-[10px] font-mono opacity-60">
                     <p>• Mão de Obra = (Ganho / Horas Mês) * Tempo</p>
                     <p>• Preço Total = Custo Total * (1 + Margem/100)</p>
@@ -492,11 +492,11 @@ export default function PricingCalculator() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <Card className="border-none shadow-sm bg-white p-4">
+            <Card className="border-none shadow-sm bg-card p-4">
               <Button 
                 onClick={resetCalculator} 
                 variant="outline" 
-                className="w-full text-slate-500 hover:text-destructive hover:bg-destructive/5 border-slate-200"
+                className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 border-border"
               >
                 <motion.div
                   animate={{ rotate: isResetting ? -360 : 0 }}

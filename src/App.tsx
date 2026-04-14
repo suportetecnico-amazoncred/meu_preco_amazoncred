@@ -1,17 +1,50 @@
-import { Calculator } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calculator, Sun, Moon } from "lucide-react";
 import PricingCalculator from "./components/PricingCalculator";
+import { Button } from "./components/ui/button";
 
 export default function App() {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") === "dark" || 
+        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
+
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-background p-4 md:p-8 font-sans transition-colors duration-300">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Calculator className="w-8 h-8 text-primary" />
               Meu Preço
             </h1>
-            <p className="text-slate-500">Calculadora de Precificação para Produtos</p>
+            <p className="text-muted-foreground">Calculadora de Precificação para Produtos</p>
+          </div>
+          <div className="absolute top-0 right-0 md:relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleDarkMode}
+              className="rounded-full hover:bg-primary/10 text-foreground"
+              title={isDarkMode ? "Mudar para modo claro" : "Mudar para modo escuro"}
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
           </div>
         </header>
 
@@ -19,7 +52,7 @@ export default function App() {
           <PricingCalculator />
         </main>
 
-        <footer className="pt-12 pb-6 text-center text-slate-400 text-xs">
+        <footer className="pt-12 pb-6 text-center text-muted-foreground text-xs">
           <p>© {new Date().getFullYear()} Meu Preço - Ferramenta de Apoio ao Pequeno Negócio</p>
         </footer>
       </div>
