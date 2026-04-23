@@ -53,7 +53,7 @@ export default function App() {
         </main>
 
         <footer className="pt-12 pb-6 text-center text-muted-foreground text-xs">
-          <p>© {new Date().getFullYear()} Meu Preço - Ferramenta de Apoio ao Pequeno Negócio</p>
+          <p>© {new Date().getFullYear()} Meu Preço - Amazoncred</p>
         </footer>
       </div>
     </div>

@@ -16,7 +16,7 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
-      hmr: true,
+      hmr: false,
     },
   };
 });
