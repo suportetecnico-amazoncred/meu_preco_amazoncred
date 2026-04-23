@@ -52,7 +52,7 @@ export default function App() {
           <PricingCalculator />
         </main>
 
-        <footer className="pt-12 pb-6 text-center text-muted-foreground text-xs">
+        <footer className="pt-2 pb-6 text-center text-muted-foreground text-xs">
           <p>© {new Date().getFullYear()} Meu Preço - Amazoncred</p>
         </footer>
       </div>
