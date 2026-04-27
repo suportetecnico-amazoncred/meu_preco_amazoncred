@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Calculator, Clock, Package, TrendingUp, Target, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Calculator, Clock, Package, TrendingUp, Target, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Separator } from "@/components/ui/separator";
 
@@ -17,29 +17,30 @@ export default function PricingCalculator() {
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   // Labor State
-  const [ganhoDesejado, setGanhoDesejado] = useState<number>(0);
-  const [ganhoDesejadoDisplay, setGanhoDesejadoDisplay] = useState('');
+  const [ganhoDesejado, setGanhoDesejado] = useState<number>(1621);
+  const [ganhoDesejadoDisplay, setGanhoDesejadoDisplay] = useState('1.621,00');
   const [horasPorDia, setHorasPorDia] = useState<number>(0);
   const [diasPorMes, setDiasPorMes] = useState<number>(0);
   
-  // Expenses State
+  // Expenses State (Materials)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [currentExpenseName, setCurrentExpenseName] = useState('');
   const [currentExpenseValue, setCurrentExpenseValue] = useState<number | ''>('');
   const [currentExpenseDisplay, setCurrentExpenseDisplay] = useState('');
 
-  // Extra Costs & Margin
-  const [custosExtras, setCustosExtras] = useState<number>(0);
-  const [custosExtrasDisplay, setCustosExtrasDisplay] = useState('0,00');
+  // Extra Costs State
+  const [extraExpenses, setExtraExpenses] = useState<ExpenseRow[]>([]);
+  const [currentExtraExpenseName, setCurrentExtraExpenseName] = useState('');
+  const [currentExtraExpenseValue, setCurrentExtraExpenseValue] = useState<number | ''>('');
+  const [currentExtraExpenseDisplay, setCurrentExtraExpenseDisplay] = useState('');
+  const [showExtraExpenses, setShowExtraExpenses] = useState(false);
+
+  // Other Settings
   const [tempoPreparo, setTempoPreparo] = useState<number>(0);
   const [margemLucro, setMargemLucro] = useState<number>(10);
 
   // Yield State
   const [quantidadeProduzida, setQuantidadeProduzida] = useState<number>(0);
-
-  // Idea 3: Break-even Point State
-  const [custosFixosMensais, setCustosFixosMensais] = useState<number>(0);
-  const [custosFixosDisplay, setCustosFixosDisplay] = useState('0,00');
 
   const [isResetting, setIsResetting] = useState(false);
 
@@ -57,11 +58,15 @@ export default function PricingCalculator() {
     return expenses.reduce((acc, curr) => acc + curr.valor, 0);
   }, [expenses]);
 
+  const custoExtraTotal = useMemo(() => {
+    return extraExpenses.reduce((acc, curr) => acc + curr.valor, 0);
+  }, [extraExpenses]);
+
   const custoMaoDeObra = useMemo(() => {
     return valorHora * tempoPreparo;
   }, [valorHora, tempoPreparo]);
 
-  const custoTotal = custoMateriais + custosExtras + custoMaoDeObra;
+  const custoTotal = custoMateriais + custoExtraTotal + custoMaoDeObra;
   
   const precoVendaTotal = useMemo(() => {
     const margemDecimal = margemLucro / 100;
@@ -70,16 +75,36 @@ export default function PricingCalculator() {
 
   const precoVendaUnitario = useMemo(() => {
     return precoVendaTotal / (quantidadeProduzida || 1);
-  }, [precoVendaTotal, quantidadeProduzida]);
+  }, [precoVendaTotal, parseInt(quantidadeProduzida.toString())]);
+
+  const precoSugerido = useMemo(() => {
+    // Arredonda para cima para o próximo 0,50 ou 1,00 para um valor mais "limpo"
+    // Ex: 13,30 -> 13,50 | 13,60 -> 14,00
+    if (precoVendaUnitario <= 0) return 0;
+    return Math.ceil(precoVendaUnitario * 2) / 2;
+  }, [precoVendaUnitario]);
+
+  const custoPorUnidade = useMemo(() => {
+    return custoTotal / (quantidadeProduzida || 1);
+  }, [custoTotal, parseInt(quantidadeProduzida.toString())]);
+
+  const precoPromocional = useMemo(() => {
+    // Sugestão de 15% de desconto sobre o preço unitário base
+    const desconto = precoVendaUnitario * 0.85;
+    // Garante que o preço promocional ainda tenha pelo menos 5% de lucro sobre o custo unitário
+    const precoMinimoSeguranca = custoPorUnidade * 1.05;
+    
+    const valorBase = Math.max(desconto, precoMinimoSeguranca);
+    
+    // Arredonda para cima para o próximo 0,50 ou 1,00 para um valor mais "limpo"
+    if (valorBase <= 0) return 0;
+    return Math.ceil(valorBase * 2) / 2;
+  }, [precoVendaUnitario, custoPorUnidade]);
 
   const lucroTotal = precoVendaTotal - custoTotal;
   const lucroUnitario = lucroTotal / (quantidadeProduzida || 1);
-
-  // Idea 3: Break-even Calculation
-  const pontoEquilibrio = useMemo(() => {
-    if (lucroUnitario <= 0) return 0;
-    return Math.ceil(custosFixosMensais / lucroUnitario);
-  }, [custosFixosMensais, lucroUnitario]);
+  const lucroSugeridoUnitario = precoSugerido - custoPorUnidade;
+  const lucroPromocionalUnitario = precoPromocional - custoPorUnidade;
 
   // Handlers
   const addExpense = () => {
@@ -98,23 +123,39 @@ export default function PricingCalculator() {
     setExpenses(expenses.filter(e => e.id !== id));
   };
 
+  const addExtraExpense = () => {
+    if (!currentExtraExpenseName || currentExtraExpenseValue === '') return;
+    setExtraExpenses([...extraExpenses, { 
+      id: crypto.randomUUID(), 
+      nome: currentExtraExpenseName, 
+      valor: Number(currentExtraExpenseValue) 
+    }]);
+    setCurrentExtraExpenseName('');
+    setCurrentExtraExpenseValue('');
+    setCurrentExtraExpenseDisplay('');
+  };
+
+  const removeExtraExpense = (id: string) => {
+    setExtraExpenses(extraExpenses.filter(e => e.id !== id));
+  };
+
   const resetCalculator = () => {
     setIsResetting(true);
-    setGanhoDesejado(0);
-    setGanhoDesejadoDisplay('');
+    setGanhoDesejado(1621);
+    setGanhoDesejadoDisplay('1.621,00');
     setHorasPorDia(0);
     setDiasPorMes(0);
     setExpenses([]);
     setCurrentExpenseName('');
     setCurrentExpenseValue('');
     setCurrentExpenseDisplay('');
-    setCustosExtras(0);
-    setCustosExtrasDisplay('0,00');
+    setExtraExpenses([]);
+    setCurrentExtraExpenseName('');
+    setCurrentExtraExpenseValue('');
+    setCurrentExtraExpenseDisplay('');
     setTempoPreparo(0);
     setMargemLucro(10);
     setQuantidadeProduzida(0);
-    setCustosFixosMensais(0);
-    setCustosFixosDisplay('0,00');
     
     // Reset the animation state after a short delay
     setTimeout(() => setIsResetting(false), 500);
@@ -152,22 +193,8 @@ export default function PricingCalculator() {
                       type="text" 
                       placeholder="Ex: 1.621,00" 
                       value={ganhoDesejadoDisplay} 
-                      onChange={e => {
-                        const rawValue = e.target.value.replace(/\D/g, "");
-                        if (rawValue === "") {
-                          setGanhoDesejadoDisplay("");
-                          setGanhoDesejado(0);
-                          return;
-                        }
-                        const numberValue = Number(rawValue) / 100;
-                        setGanhoDesejado(numberValue);
-                        setGanhoDesejadoDisplay(
-                          numberValue.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        );
-                      }}
+                      disabled
+                      onChange={() => {}}
                     />
                   </div>
                 </div>
@@ -305,7 +332,141 @@ export default function PricingCalculator() {
             </Card>
           </motion.div>
 
-          {/* 3. Tempo, Custos Fixos e Margem */}
+          {/* 3. Outros Custos */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.25 }}
+          >
+            <Card className="border-none shadow-sm bg-card overflow-hidden">
+              <CardHeader className="pb-4 flex flex-row items-start justify-between space-y-0">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-primary" />
+                    3. Outros Custos
+                  </CardTitle>
+                  <CardDescription>Adicione outros custos como embalagens, entregas, etc.</CardDescription>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowExtraExpenses(!showExtraExpenses)}
+                  className="text-primary hover:bg-primary/10 -mt-1"
+                >
+                  {showExtraExpenses ? (
+                    <>
+                      <ChevronUp className="w-4 h-4 mr-2" /> Ocultar
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4 mr-2" /> Mostrar
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <AnimatePresence>
+                {showExtraExpenses && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <CardContent className="space-y-6 pt-0">
+                      <div className="p-4 bg-muted rounded-xl border border-border space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label className="text-xs">O que é o custo?</Label>
+                            <Input 
+                              placeholder="Ex: Embalagem, Frete, Comissão..." 
+                              value={currentExtraExpenseName} 
+                              onChange={e => setCurrentExtraExpenseName(e.target.value)}
+                              className="bg-card"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Quanto custou?</Label>
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <Input 
+                                  type="text" 
+                                  placeholder="0,00" 
+                                  value={currentExtraExpenseDisplay} 
+                                  onChange={e => {
+                                    const rawValue = e.target.value.replace(/\D/g, "");
+                                    if (rawValue === "") {
+                                      setCurrentExtraExpenseDisplay("");
+                                      setCurrentExtraExpenseValue("");
+                                      return;
+                                    }
+                                    const numberValue = Number(rawValue) / 100;
+                                    setCurrentExtraExpenseValue(numberValue);
+                                    setCurrentExtraExpenseDisplay(
+                                      numberValue.toLocaleString("pt-BR", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      })
+                                    );
+                                  }}
+                                  className="bg-card"
+                                />
+                              </div>
+                              <Button onClick={addExtraExpense} className="shrink-0" disabled={!currentExtraExpenseName || currentExtraExpenseValue === ''}>
+                                <Plus className="w-4 h-4 mr-2" /> Adicionar
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        {extraExpenses.length === 0 ? (
+                          <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
+                            <p className="text-xs text-muted-foreground">Nenhum custo extra adicionado ainda.</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-border border border-border rounded-xl overflow-hidden">
+                            <AnimatePresence initial={false}>
+                              {extraExpenses.map((row) => (
+                                <motion.div 
+                                  key={row.id}
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="flex items-center justify-between p-3 bg-card hover:bg-muted transition-colors"
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-foreground">{row.nome}</span>
+                                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Custo Extra</span>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <span className="font-bold text-foreground">
+                                      {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </span>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => removeExtraExpense(row.id)}
+                                      className="text-muted-foreground hover:text-destructive h-8 w-8"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </AnimatePresence>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          </motion.div>
+
+          {/* 4. Configurações e Metas */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -315,11 +476,11 @@ export default function PricingCalculator() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-primary" />
-                  3. Custos e Metas
+                  4. Configurações e Metas
                 </CardTitle>
-                <CardDescription>Custos fixos ajudam a calcular o ponto de equilíbrio.</CardDescription>
+                <CardDescription>Defina o tempo de produção e margem de lucro.</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Tempo de Produção (h)</Label>
                   <Input 
@@ -329,58 +490,6 @@ export default function PricingCalculator() {
                     value={tempoPreparo || ''} 
                     onChange={e => setTempoPreparo(Number(e.target.value))}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Custos Extras (Unid)</Label>
-                  <div className="relative">
-                    <Input 
-                      type="text" 
-                      placeholder="0,00" 
-                      value={custosExtrasDisplay} 
-                      onChange={e => {
-                        const rawValue = e.target.value.replace(/\D/g, "");
-                        if (rawValue === "") {
-                          setCustosExtrasDisplay("");
-                          setCustosExtras(0);
-                          return;
-                        }
-                        const numberValue = Number(rawValue) / 100;
-                        setCustosExtras(numberValue);
-                        setCustosExtrasDisplay(
-                          numberValue.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        );
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Custos Fixos (Mês)</Label>
-                  <div className="relative">
-                    <Input 
-                      type="text" 
-                      placeholder="Ex: Aluguel" 
-                      value={custosFixosDisplay} 
-                      onChange={e => {
-                        const rawValue = e.target.value.replace(/\D/g, "");
-                        if (rawValue === "") {
-                          setCustosFixosDisplay("");
-                          setCustosFixosMensais(0);
-                          return;
-                        }
-                        const numberValue = Number(rawValue) / 100;
-                        setCustosFixosMensais(numberValue);
-                        setCustosFixosDisplay(
-                          numberValue.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        );
-                      }}
-                    />
-                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Margem Lucro (%)</Label>
@@ -422,10 +531,10 @@ export default function PricingCalculator() {
                     <span className="text-muted-foreground">Mão de Obra ({tempoPreparo}h):</span>
                     <span>{custoMaoDeObra.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Custos Extras:</span>
-                    <span>{custosExtras.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                  </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Custos Extras:</span>
+            <span>{custoExtraTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          </div>
                   <Separator className="bg-border" />
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground font-medium">Custo de Produção Total:</span>
@@ -456,7 +565,7 @@ export default function PricingCalculator() {
                   </div>
 
                   <div className="pt-2">
-                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Preço por Unidade</p>
+                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Sugestão de Venda (Unid)</p>
                     <h3 className="text-2xl font-black text-secondary">
                       {precoVendaUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </h3>
@@ -464,16 +573,24 @@ export default function PricingCalculator() {
                   </div>
                 </div>
 
-                {/* Idea 3: Break-even Point UI */}
-                {custosFixosMensais > 0 && (
-                  <div className="p-4 bg-muted border border-border rounded-xl flex items-center gap-3">
-                    <Target className="w-8 h-8 text-secondary" />
-                    <div>
-                      <p className="text-[10px] uppercase text-muted-foreground font-bold">Meta de Vendas</p>
-                      <p className="text-sm">Venda <span className="text-secondary font-bold">{pontoEquilibrio} unidades</span> para pagar seus custos fixos.</p>
-                    </div>
+                {/* Estratégias de Venda */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-muted border border-border rounded-xl space-y-1">
+                    <p className="text-[10px] uppercase text-muted-foreground font-bold">Preço Sugerido</p>
+                    <p className="text-lg font-bold text-foreground">
+                      {precoSugerido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </p>
+                    <p className="text-[10px] text-green-600 font-medium">+ {lucroSugeridoUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} lucro</p>
                   </div>
-                )}
+                  
+                  <div className="p-3 bg-secondary/10 border border-secondary/20 rounded-xl space-y-1">
+                    <p className="text-[10px] uppercase text-secondary font-bold">Preço Promocional</p>
+                    <p className="text-lg font-bold text-secondary">
+                      {precoPromocional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </p>
+                    <p className="text-[10px] text-secondary/70 font-medium">Lucro: {lucroPromocionalUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                  </div>
+                </div>
 
                 <div className="space-y-3 pt-4">
                   <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-wider">Resumo das Fórmulas</h4>
