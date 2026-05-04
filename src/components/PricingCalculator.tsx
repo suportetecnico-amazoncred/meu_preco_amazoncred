@@ -544,7 +544,7 @@ export default function PricingCalculator() {
 
                 <div className="p-6 bg-primary rounded-2xl space-y-4 text-center">
                   <div>
-                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Preço de Venda Total (Lote)</p>
+                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Venda Total com Juros (Lote)</p>
                     <h2 className="text-4xl font-black text-primary-foreground">
                       {precoVendaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </h2>
@@ -565,7 +565,16 @@ export default function PricingCalculator() {
                   </div>
 
                   <div className="pt-2">
-                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Sugestão de Venda (Unid)</p>
+                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Preço de Custo (Unid)</p>
+                    <h3 className="text-xl font-bold text-primary-foreground">
+                      {custoPorUnidade.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </h3>
+                  </div>
+
+                  <Separator className="bg-primary-foreground/20" />
+
+                  <div className="pt-1">
+                    <p className="text-xs uppercase font-black tracking-widest text-primary-foreground/80">Preço de Venda (Unid)</p>
                     <h3 className="text-2xl font-black text-secondary">
                       {precoVendaUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </h3>
