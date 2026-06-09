@@ -187,15 +187,9 @@ export default function PricingCalculator() {
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>Meta de Ganho Mensal</Label>
-                  <div className="relative">
-                    <Input 
-                      type="text" 
-                      placeholder="Ex: 1.621,00" 
-                      value={ganhoDesejadoDisplay} 
-                      disabled
-                      onChange={() => {}}
-                    />
+                  <Label className="text-center block">Base de Ganho Mensal</Label>
+                  <div className="text-lg font-bold text-foreground py-2 h-10 flex items-center justify-center">
+                    {ganhoDesejado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -553,7 +547,7 @@ export default function PricingCalculator() {
                   <Separator className="bg-primary-foreground/20" />
 
                   <div className="space-y-2">
-                    <Label className="text-[10px] uppercase font-bold text-primary-foreground/70">Quantidade Produzida (Rendimento)</Label>
+                    <Label className="text-[10px] uppercase font-bold text-primary-foreground/70 text-center block">Quantidade Produzida (Rendimento)</Label>
                     <Input 
                       type="number" 
                       min="0"
@@ -592,7 +586,7 @@ export default function PricingCalculator() {
                     <p className="text-[10px] text-green-600 font-medium">+ {lucroSugeridoUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} lucro</p>
                   </div>
                   
-                  <div className="p-3 bg-secondary/10 border border-secondary/20 rounded-xl space-y-1">
+                  <div className="p-3 bg-secondary/10 border border-border rounded-xl space-y-1">
                     <p className="text-[10px] uppercase text-secondary font-bold">Preço Promocional</p>
                     <p className="text-lg font-bold text-secondary">
                       {precoPromocional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
